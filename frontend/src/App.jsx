@@ -39,16 +39,29 @@ export default function App() {
   const [categorias, setCategorias] = useState([]);
   const [categoriaActiva, setCategoriaActiva] = useState('');
   const [platillos, setPlatillos] = useState([]);
+  const getTexto = (item, campoPrincipal) => {
+    // Si no hay item, no devolvemos nada
+    if (!item) return '';
+    
+    // LÍNEA DE SEGURIDAD: Si es solo una palabra (string), la devolvemos tal cual
+    if (typeof item === 'string') return item;
+
+    // Si es el objeto completo de la base de datos, aplicamos la magia
+    if (idioma === 'en' && item[`${campoPrincipal}_en`]) return item[`${campoPrincipal}_en`];
+    if (idioma === 'pt' && item[`${campoPrincipal}_pt`]) return item[`${campoPrincipal}_pt`];
+    
+    return item[campoPrincipal];
+  };
 
   useEffect(() => {
     fetch('http://127.0.0.1:8000/api/categorias/')
       .then(response => response.json())
       .then(data => {
-        const nombres = data.map(cat => cat.nombre);
-        setCategorias(nombres);
-        if (nombres.length > 0) setCategoriaActiva(nombres[0]);
+        setCategorias(data); // Aquí guardamos los objetos con todos sus idiomas
+        if (data.length > 0) {
+          setCategoriaActiva(data[0].nombre); // Activamos la primera por defecto
+        }
       })
-      .catch(err => console.error("Error:", err));
 
     fetch('http://127.0.0.1:8000/api/platillos/')
       .then(response => response.json())
@@ -106,17 +119,17 @@ export default function App() {
 
         {/* --- NAVEGACIÓN --- */}
         <div className="flex flex-wrap justify-center gap-8 mb-16 border-b border-zinc-100 dark:border-zinc-900 pb-6">
-          {categorias.map(cat => (
+          {categorias.map((cat, index) => (
             <button 
-              key={cat}
-              onClick={() => setCategoriaActiva(cat)}
+              key={cat.id || cat.nombre || index}
+              onClick={() => setCategoriaActiva(cat.nombre || cat)}
               className={`text-xs tracking-widest uppercase transition-all duration-300 ${
                 categoriaActiva === cat 
                   ? (darkMode ? 'text-amber-500' : 'text-black font-bold scale-110') 
                   : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200'
               }`}
             >
-              {t.categorias[cat] || cat}
+              {getTexto(cat, 'nombre')}
             </button>
           ))}
         </div>
@@ -127,7 +140,8 @@ export default function App() {
             <p className="col-span-full text-center text-zinc-400 italic">{t.sinPlatos}</p>
           ) : (
             platillos
-              .filter(p => p.categoria_nombre === categoriaActiva || p.categoria === categoriaActiva) 
+              // AJUSTAMOS EL FILTRO AQUÍ:
+              .filter(p => p.categoria_nombre === categoriaActiva || p.categoria === categoriaActiva || (categorias.find(c => c.nombre === categoriaActiva) && p.categoria === categorias.find(c => c.nombre === categoriaActiva).id)) 
               .map((plato) => (
               <div 
                 key={plato.id} 
@@ -135,14 +149,14 @@ export default function App() {
               >
                 <div className="flex justify-between items-baseline mb-2 border-b border-dotted border-zinc-200 dark:border-zinc-800 pb-1">
                   <h3 className={`text-lg font-medium transition-colors ${darkMode ? 'group-hover:text-amber-400' : 'group-hover:text-zinc-500'}`} style={{ fontFamily: 'Georgia, serif' }}>
-                    {plato.nombre}
+                    {getTexto(plato, 'nombre')}
                   </h3>
                   <span className={`text-sm font-semibold ${darkMode ? 'text-amber-500' : 'text-black'}`}>
                     ${parseFloat(plato.precio).toFixed(2)}
                   </span>
                 </div>
                 <p className="text-sm italic leading-relaxed text-zinc-500 dark:text-zinc-400">
-                  {plato.descripcion}
+                  {getTexto(plato, 'descripcion')}
                 </p>
               </div>
             ))
