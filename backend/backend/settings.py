@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-)7)^w2yh16ku*xs7)eon5v_n#)qddaoz6au(zsc*w=8p-rxxz6
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -111,7 +111,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'es' # El idioma por defecto al entrar
+LANGUAGE_CODE = 'es-ar' # El idioma por defecto al entrar
+
+TIME_ZONE = 'America/Argentina/Buenos_Aires'
 
 LANGUAGES = [
     ('es', 'Español'),
@@ -122,12 +124,16 @@ USE_I18N = True
 
 USE_TZ = True
 
+USE_L10N = True
+
+NUMBER_GROUPING = 3
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
 
+# Default primary key field type
 CORS_ALLOW_ALL_ORIGINS = True
 
 JAZZMIN_SETTINGS = {
@@ -154,3 +160,5 @@ JAZZMIN_UI_TWEAKS = {
         "success": "btn-dark",
     },
 }
+
+CORS_ALLOW_ALL_ORIGINS = True

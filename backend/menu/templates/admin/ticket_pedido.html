@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Ticket Pedido #{{ pedido.id }}</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            width: 280px; /* Tamaño ideal para impresoras térmicas de 80mm */
+            margin: 0;
+            padding: 10px;
+        }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .linea { border-top: 1px dashed #000; margin: 10px 0; }
+        .logo { font-weight: bold; font-size: 16px; margin-bottom: 5px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { border-bottom: 1px solid #000; text-align: left; }
+        td { padding: 4px 0; vertical-align: top; }
+        .total-seccion { font-size: 14px; font-weight: bold; }
+        
+        /* ESTO HACE LA MAGIA: Al imprimir, oculta el botón y ajusta los márgenes */
+        @media print {
+            .no-print { display: none; }
+            body { width: 100%; margin: 0; padding: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="text-center no-print" style="margin-bottom: 20px;">
+        <button onclick="window.print();" style="padding: 10px 20px; background: #f59e0b; border: none; font-weight: bold; cursor: pointer; border-radius: 5px;">
+            CONFIRMAR IMPRESIÓN
+        </button>
+        <hr>
+    </div>
+
+    <div class="text-center">
+        <div class="logo">HOTEL LAS MARÍAS</div>
+        <div>Servicio de Habitación</div>
+        <div>Fecha: {{ pedido.fecha|date:"d/m/Y H:i" }}</div>
+        <div><strong>PEDIDO Nº: {{ pedido.id }}</strong></div>
+    </div>
+
+    <div class="linea"></div>
+
+    <div>
+        <strong>Cliente:</strong> {{ pedido.cliente }}<br>
+        <strong>Habitación:</strong> {{ pedido.habitacion }}
+    </div>
+
+    <div class="linea"></div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 60%;">Plato</th>
+                <th style="width: 15%; text-align: center;">Cant</th>
+                <th style="width: 25%; text-align: right;">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for detalle in detalles %}
+            <tr>
+                <td>{{ detalle.platillo.nombre }}</td>
+                <td style="text-align: center;">{{ detalle.cantidad }}</td>
+                <td class="text-right">${{ detalle.precio_unitario }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="linea"></div>
+
+    <table class="total-seccion">
+        <tr>
+            <td>TOTAL:</td>
+            <td class="text-right">${{ total_formateado }}</td>
+        </tr>
+    </table>
+
+    <div class="linea"></div>
+
+    <div class="text-center" style="margin-top: 15px; font-size: 10px;">
+        ¡Muchas gracias por su compra!<br>
+        Las Marías Hotel
+    </div>
+
+    <script>
+        // Descomenta la línea de abajo si quieres que se abra el panel de impresión apenas cargue
+        // window.onload = function() { window.print(); }
+    </script>
+</body>
+</html>

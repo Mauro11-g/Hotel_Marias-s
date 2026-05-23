@@ -52,3 +52,28 @@ class Platillo(models.Model):
 
         # 3. Guardar todo en la base de datos
         super().save(*args, **kwargs)
+
+
+class Pedido(models.Model):
+    ESTADOS = [
+        ('P', 'Pendiente'),
+        ('E', 'Entregado'),
+        ('C', 'Cancelado'),
+    ]
+    cliente = models.CharField(max_length=100)
+    habitacion = models.IntegerField(null=True, blank=True) # Por si es para el bar del hotel
+    fecha = models.DateTimeField(auto_now_add=True)
+    total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    estado = models.CharField(max_length=1, choices=ESTADOS, default='P')
+
+    def __str__(self):
+        return f"Pedido {self.id} - {self.cliente}"
+
+class DetallePedido(models.Model):
+    pedido = models.ForeignKey(Pedido, related_name='detalles', on_delete=models.CASCADE)
+    platillo = models.ForeignKey(Platillo, on_delete=models.CASCADE)
+    cantidad = models.IntegerField(default=1)
+    precio_unitario = models.DecimalField(max_digits=8, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.cantidad} x {self.platillo.nombre}"
