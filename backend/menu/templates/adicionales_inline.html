@@ -1,0 +1,185 @@
+{% extends "admin/edit_inline/tabular.html" %}
+
+{% block extramstyle %}
+{{ block.super }}
+<style>
+    /* Ajustes fijos para que la grilla quede perfectamente alineada */
+    .tabular.inline-related table tbody td.field-cantidad input {
+        width: 65px !important;
+        text-align: center !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 4px !important;
+        padding: 4px !important;
+    }
+    
+    .tabular.inline-related table tbody td.field-platillo {
+        width: 320px !important; 
+        min-width: 320px !important;
+    }
+    
+    /* Ocultar los iconos nativos (lápiz, más, ojo) del buscador select2 */
+    .tabular.inline-related table tbody td.field-platillo .related-widget-wrapper-link,
+    .tabular.inline-related table tbody td.field-platillo .add-related,
+    .tabular.inline-related table tbody td.field-platillo .change-related {
+        display: none !important;
+    }
+
+    /* Rediseño moderno, limpio y acotado del cuadro de adicionales */
+    .tabular.inline-related table tbody td.field-adicionales select {
+        display: block !important;
+        width: 100% !important;
+        min-width: 240px !important;
+        height: 85px !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 6px !important;
+        padding: 4px !important;
+        background-color: #fff !important;
+        font-size: 11px !important;
+        color: #334155 !important;
+    }
+    
+    .tabular.inline-related table tbody td.field-adicionales select option {
+        padding: 3px 6px !important;
+        border-radius: 4px !important;
+        margin-bottom: 2px !important;
+    }
+    
+    .tabular.inline-related table tbody td.field-adicionales select option:checked {
+        background-color: #e2e8f0 !important;
+        color: #0f172a !important;
+        font-weight: bold !important;
+    }
+    
+    /* Remover el texto de ayuda molesto de Django */
+    .tabular.inline-related table tbody td.field-adicionales .help {
+        display: none !important;
+    }
+
+    /* Botón de eliminación estilizado */
+    .tabular.inline-related table thead th.column-delete {
+        font-size: 0 !important;
+        color: transparent !important;
+    }
+    .tabular.inline-related table thead th.column-delete::after {
+        content: "¿Eliminar?" !important;
+        font-size: 11px !important;
+        color: #64748b !important;
+        font-weight: bold !important;
+    }
+    
+    .tabular.inline-related table tbody td.delete input[type="checkbox"] {
+        position: absolute !important;
+        clip: rect(0,0,0,0) !important;
+        padding: 0 !important;
+        border: 0 !important;
+        height: 1px !important;
+        width: 1px !important;
+        overflow: hidden !important;
+    }
+    
+    .tabular.inline-related table tbody td.delete {
+        position: relative;
+        cursor: pointer !important;
+        vertical-align: middle !important;
+        text-align: center !important;
+    }
+    
+    .tabular.inline-related table tbody td.delete::after {
+        content: "Eliminar" !important;
+        display: inline-block !important;
+        padding: 6px 14px !important;
+        background-color: #dc3545 !important;
+        color: white !important;
+        font-size: 11px !important;
+        font-weight: bold !important;
+        border-radius: 4px !important;
+    }
+    
+    .tabular.inline-related table tbody td.delete:hover::after {
+        background-color: #bd2130 !important;
+    }
+    
+    .tabular.inline-related table tbody tr.deleted_row {
+        background-color: #fef2f2 !important;
+        opacity: 0.5;
+    }
+    
+    .tabular.inline-related table tbody tr.deleted_row td.delete::after {
+        content: "Deshacer" !important;
+        background-color: #475569 !important;
+    }
+</style>
+{% endblock %}
+
+{% block inline_field_sets %}
+{{ block.super }}
+<script>
+    (function() {
+        function calcularTotal() {
+            let totalGeneral = 0;
+            document.querySelectorAll('.tabular.inline-related table tbody tr:not(.empty-form)').forEach(row => {
+                if (row.classList.contains('deleted_row')) return;
+
+                const selectPlatillo = row.querySelector('.field-platillo select, .field-platillo input[type="hidden"]');
+                const cantidadInput = row.querySelector('.field-cantidad input');
+                const precioDiv = row.querySelector('.field-precio_formateado p');
+                
+                if (!selectPlatillo || !selectPlatillo.value || selectPlatillo.value === "") return;
+                
+                if (cantidadInput && precioDiv) {
+                    const cantidad = parseFloat(cantidadInput.value) || 0;
+                    let precioTexto = precioDiv.textContent.replace('$', '').replace(/\\./g, '').replace(',', '.');
+                    const precioPlatillo = parseFloat(precioTexto) || 0;
+                    
+                    let totalAdicionales = 0;
+                    row.querySelectorAll('.field-adicionales select option:checked').forEach(opcion => {
+                        const match = opcion.textContent.match(/\\(\\+\\$([\\d.,]+)\\)/);
+                        if (match) {
+                            totalAdicionales += parseFloat(match[1].replace(/\\./g, '').replace(',', '.')) || 0;
+                        }
+                    });
+
+                    totalGeneral += cantidad * (precioPlatillo + totalAdicionales);
+                }
+            });
+
+            const totalInput = document.querySelector('#id_total');
+            if (totalInput) totalInput.value = totalGeneral.toFixed(2);
+        }
+
+        // Ejecutar con el cargador global
+        window.addEventListener('load', function() {
+            if (window.django && window.django.jQuery) {
+                const $ = django.jQuery;
+                $(document).on('change', '.field-adicionales select, .field-cantidad input', calcularTotal);
+                
+                $('.tabular.inline-related').on('click', 'td.delete', function () {
+                    const row = this.closest('tr');
+                    const checkbox = this.querySelector('input[type="checkbox"]');
+                    if (checkbox) {
+                        checkbox.checked = !checkbox.checked;
+                        row.classList.toggle('deleted_row', checkbox.checked);
+                    }
+                    calcularTotal();
+                });
+
+                $(document).on('change', '.field-platillo select', function (e) {
+                    const row = e.target.closest('tr');
+                    const precioDiv = row.querySelector('.field-precio_formateado p');
+                    if (!e.target.value) return;
+
+                    fetch(`/api/platillos/${e.target.value}/precio/`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (precioDiv) {
+                                precioDiv.textContent = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(data.precio);
+                            }
+                            calcularTotal();
+                        });
+                });
+            }
+            setTimeout(calcularTotal, 300);
+        });
+    })();
+</script>
+{% endblock %}

@@ -8,7 +8,6 @@ const formatearMoneda = (valor) => {
   }).format(numero);
 };
 
-
 const traducciones = {
   es: {
     subtitulo: "REALIZAR PEDIDO",
@@ -18,9 +17,11 @@ const traducciones = {
     carritoVacio: "No has seleccionado ningún platillo.",
     formularioCliente: "Nombre para el pedido",
     formularioMesa: "Habitación",
+    formularioNotas: "Notas / Aclaraciones (ej: sin cebolla)",
     botonEnviar: "Confirmar y Enviar Pedido",
     pedidoExito: "¡Pedido enviado con éxito! Se está procesando.",
-    total: "Total"
+    total: "Total",
+    adicionalesTitulo: "Adicionales:"
   },
   en: {
     subtitulo: "PLACE ORDER",
@@ -30,9 +31,11 @@ const traducciones = {
     carritoVacio: "You haven't selected any dishes yet.",
     formularioCliente: "Name for the order",
     formularioMesa: "Room Number",
+    formularioNotas: "Notes / Special Requests (e.g., no onions)",
     botonEnviar: "Confirm & Send Order",
     pedidoExito: "Order sent successfully! Processing.",
-    total: "Total"
+    total: "Total",
+    adicionalesTitulo: "Add-ons:"
   },
   pt: {
     subtitulo: "FAZER PEDIDO",
@@ -42,9 +45,11 @@ const traducciones = {
     carritoVacio: "Você não selecionou nenhum prato.",
     formularioCliente: "Nome para o pedido",
     formularioMesa: "Quarto",
+    formularioNotas: "Notas / Observações (ex: sem cebola)",
     botonEnviar: "Confirmar e Enviar Pedido",
     pedidoExito: "Pedido enviado com sucesso! Processando.",
-    total: "Total"
+    total: "Total",
+    adicionalesTitulo: "Adicionais:"
   }
 };
 
@@ -54,11 +59,17 @@ export default function PaginaPedidos() {
   const [categorias, setCategorias] = useState([]);
   const [categoriaActiva, setCategoriaActiva] = useState('');
   const [platillos, setPlatillos] = useState([]);
+  const [adicionalesDisponibles, setAdicionalesDisponibles] = useState([]);
   
-  // --- ESTADOS NUEVOS PARA EL CARRITO Y EL FORMULARIO ---
+  // Guardamos los adicionales tildados temporalmente por el cliente en el menú principal
+  // Estructura: { [platilloId]: [idAdicional1, idAdicional2] }
+  const [adicionalesSeleccionados, setAdicionalesSeleccionados] = useState({});
+
+  // --- ESTADOS DEL CARRITO Y FORMULARIO ---
   const [carrito, setCarrito] = useState([]);
   const [cliente, setCliente] = useState('');
   const [mesa, setMesa] = useState('');
+  const [notas, setNotas] = useState(''); // <-- NUEVO ESTADO PARA NOTAS
   const [enviadoExito, setEnviadoExito] = useState(false);
   const [notificacion, setNotificacion] = useState("");
 
@@ -84,31 +95,65 @@ export default function PaginaPedidos() {
       .then(response => response.json())
       .then(data => setPlatillos(data))
       .catch(err => console.error("Error:", err));
+
+    // Traemos los adicionales de la API que creaste en Django
+    fetch('http://localhost:8000/api/adicionales/')
+      .then(response => response.json())
+      .then(data => setAdicionalesDisponibles(data))
+      .catch(err => console.error("Error trayendo adicionales:", err));
   }, []);
+
+  // --- MANEJO DE SELECCIÓN DE CHECKBOXES DE ADICIONALES ---
+  const manejarCheckboxAdicional = (platilloId, adicionalId) => {
+    setAdicionalesSeleccionados(prev => {
+      const actuales = prev[platilloId] || [];
+      if (actuales.includes(adicionalId)) {
+        return { ...prev, [platilloId]: actuales.filter(id => id !== adicionalId) };
+      } else {
+        return { ...prev, [platilloId]: [...actuales, adicionalId] };
+      }
+    });
+  };
 
   // --- LÓGICA INTERNA DEL CARRITO ---
   const agregarAlCarrito = (plato) => {
+    // Obtenemos los objetos completos de los adicionales que el cliente tildó para este plato
+    const idsElegidos = adicionalesSeleccionados[plato.id] || [];
+    const adicionalesCompletos = adicionalesDisponibles.filter(a => idsElegidos.includes(a.id));
+
     setCarrito((prevCarrito) => {
-      const existe = prevCarrito.find(item => item.id === plato.id);
+      // Un elemento en el carrito se considera duplicado si coincide el ID del plato Y exactamente los mismos adicionales
+      const existe = prevCarrito.find(item => 
+        item.id === plato.id && 
+        JSON.stringify(item.adicionales.map(a => a.id).sort()) === JSON.stringify(idsElegidos.sort())
+      );
+
       if (existe) {
         return prevCarrito.map(item => 
-          item.id === plato.id ? { ...item, cantidad: item.cantidad + 1 } : item
+          item.id === existe.id && JSON.stringify(item.adicionales.map(a => a.id).sort()) === JSON.stringify(idsElegidos.sort())
+            ? { ...item, cantidad: item.cantidad + 1 } 
+            : item
         );
       }
-      return [...prevCarrito, { ...plato, cantidad: 1 }];
-    });
-    setNotificacion(`"${plato.nombre}" agregado al pedido`);
 
-    setTimeout(() => {
-      setNotificacion("");
-    }, 2000);
+      // Creamos una clave compuesta única para identificar este combo en la UI del carrito
+      const carritoIdUnique = `${plato.id}-${idsElegidos.join('-')}-${Date.now()}`;
+
+      return [...prevCarrito, { ...plato, carritoId: carritoIdUnique, cantidad: 1, adicionales: adicionalesCompletos }];
+    });
+
+    // Limpiamos los checkboxes del menú para el siguiente plato
+    setAdicionalesSeleccionados(prev => ({ ...prev, [plato.id]: [] }));
+
+    setNotificacion(`"${getTexto(plato, 'nombre')}" agregado al pedido`);
+    setTimeout(() => setNotificacion(""), 2000);
   };
 
-  const modificarCantidad = (id, incremento) => {
+  const modificarCantidad = (carritoId, incremento) => {
     setCarrito((prevCarrito) => 
       prevCarrito.map(item => {
-        if (item.id === id) {
-          const nuevaCantidad = item.cantidad + incremento;
+        if (item.carritoId === carritoId) {
+          const nuevaCantidad = Number(item.cantidad) + incremento;
           return nuevaCantidad > 0 ? { ...item, cantidad: nuevaCantidad } : null;
         }
         return item;
@@ -116,8 +161,15 @@ export default function PaginaPedidos() {
     );
   };
 
+  // Calcula el costo de un renglón sumando precio de plato + adicionales seleccionados
+  const obtenerPrecioItemCompleto = (item) => {
+    const precioPlato = parseFloat(item.precio) || 0;
+    const precioAdicionales = item.adicionales.reduce((sum, a) => sum + (parseFloat(a.precio) || 0), 0);
+    return precioPlato + precioAdicionales;
+  };
+
   const calcularTotal = () => {
-    return carrito.reduce((sum, item) => sum + (parseFloat(item.price || item.precio) * item.cantidad), 0).toFixed(2);
+    return carrito.reduce((sum, item) => sum + (obtenerPrecioItemCompleto(item) * item.cantidad), 0).toFixed(2);
   };
 
   // --- ENVIAR DATOS A DJANGO ---
@@ -125,17 +177,16 @@ export default function PaginaPedidos() {
     e.preventDefault();
     if (!cliente || carrito.length === 0) return;
 
-    const totalCrudo = carrito.reduce((sum, item) => sum + (parseFloat(item.precio) * item.cantidad), 0).toFixed(2);
-
     const datosPedido = {
       cliente: cliente,
       habitacion: mesa,
-      total: totalCrudo,
-      // Mapeamos los artículos para que Django reciba el ID del plato y su cantidad
+      total: calcularTotal(),
+      notas: notas, // <-- ENVIAMOS EL CAMPO NOTAS A TU DJANGO
       detalles: carrito.map(item => ({
         platillo_id: item.id,
         cantidad: item.cantidad,
-        precio_unitario: parseFloat(item.precio).toFixed(2)
+        precio_unitario: parseFloat(item.precio).toFixed(2),
+        adicionales: item.adicionales.map(a => a.id) // <-- ENVIAMOS EL ARRAY DE IDs DE ADICIONALES
       }))
     };
 
@@ -152,6 +203,7 @@ export default function PaginaPedidos() {
         setCarrito([]);
         setCliente('');
         setMesa('');
+        setNotas(''); // Limpiamos las notas
         setTimeout(() => setEnviadoExito(false), 5000);
       }
     })
@@ -169,7 +221,7 @@ export default function PaginaPedidos() {
           <select 
             value={idioma}
             onChange={(e) => setIdioma(e.target.value)}
-            className={`bg-transparent text-xs font-medium tracking-widest uppercase outline-none cursor-pointer border-b ${darkMode ? 'border-zinc-800' : 'border-black/10'}`}
+            className={`bg-transparent text-xs font-medium tracking-widest uppercase outline-none cursor-pointer border-b ${darkMode ? 'border-zinc-800 text-white' : 'border-black/10 text-black'}`}
           >
             <option value="es" className="text-black">ES</option>
             <option value="en" className="text-black">EN</option>
@@ -201,12 +253,11 @@ export default function PaginaPedidos() {
           </p>
         </div>
 
-        {/* --- CONTENIDO DIVIDIDO EN DOS COLUMNAS (MENÚ | CARRITO) --- */}
+        {/* --- CONTENIDO DIVIDIDO EN DOS COLUMNAS --- */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-16 items-start">
           
-          {/* COLUMNA DE PLATOS (Ocupa 2/3) */}
+          {/* COLUMNA DE PLATOS */}
           <div className="lg:col-span-2">
-            {/* Navegación de Categorías interna */}
             <div className="flex flex-wrap gap-6 mb-10 border-b border-zinc-100 dark:border-zinc-900 pb-4">
               {categorias.map((cat, index) => (
                 <button 
@@ -223,7 +274,6 @@ export default function PaginaPedidos() {
               ))}
             </div>
 
-            {/* Listado */}
             <div className="space-y-10">
               {platillos.length === 0 ? (
                 <p className="text-zinc-400 italic">{t.sinPlatos}</p>
@@ -252,16 +302,40 @@ export default function PaginaPedidos() {
                           </button>
                         </div>
                       </div>
-                      <p className="text-sm italic text-zinc-500 dark:text-zinc-400 max-w-xl">
+                      <p className="text-sm italic text-zinc-500 dark:text-zinc-400 max-w-xl mb-4">
                         {getTexto(plato, 'descripcion')}
                       </p>
+
+                      {/* RENDEREADO DE ADICIONALES ABAJO DEL PLATO */}
+                      {adicionalesDisponibles.length > 0 && (
+                        <div className="mt-3 pl-4 border-l-2 border-zinc-200 dark:border-zinc-800">
+                          <p className="text-xs uppercase tracking-wider text-zinc-400 mb-2 font-medium">{t.adicionalesTitulo}</p>
+                          <div className="flex flex-wrap gap-4">
+                            {adicionalesDisponibles
+                            .filter(adi => adi.platillos_permitidos && adi.platillos_permitidos.includes(plato.id))
+                            .map(adi => (
+                              <label key={adi.id} className="flex items-center gap-2 text-xs cursor-pointer select-none">
+                                <input 
+                                  type="checkbox"
+                                  checked={(adicionalesSeleccionados[plato.id] || []).includes(adi.id)}
+                                  onChange={() => manejarCheckboxAdicional(plato.id, adi.id)}
+                                  className="accent-amber-500 rounded"
+                                />
+                                <span className={darkMode ? 'text-zinc-400' : 'text-zinc-600'}>
+                                  {getTexto(adi, 'nombre')} (+${formatearMoneda(adi.precio)})
+                                </span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))
               )}
             </div>
           </div>
 
-          {/* COLUMNA DEL CARRITO / FORMULARIO (Ocupa 1/3) */}
+          {/* COLUMNA DEL CARRITO */}
           <div className={`p-6 border ${darkMode ? 'bg-zinc-900/30 border-zinc-900' : 'bg-zinc-50/50 border-zinc-100'}`}>
             <h2 className="text-xl font-medium mb-6 tracking-wide" style={{ fontFamily: 'Georgia, serif' }}>
               {t.carritoTitulo}
@@ -278,18 +352,24 @@ export default function PaginaPedidos() {
             ) : (
               <form onSubmit={manejarEnviarPedido} className="space-y-6">
                 
-                {/* Lista de productos en el Carrito */}
                 <div className="space-y-4 max-h-60 overflow-y-auto pr-2">
                   {carrito.map((item) => (
-                    <div key={item.id} className="flex justify-between items-center text-sm">
+                    <div key={item.carritoId} className="flex justify-between items-center text-sm border-b border-zinc-100 dark:border-zinc-900/50 pb-2">
                       <div className="flex-1 pr-2">
                         <p className="font-medium">{getTexto(item, 'nombre')}</p>
-                        <p className="text-xs text-zinc-400">${formatearMoneda(item.precio)} c/u</p>
+                        
+                        {/* Mostrar adicionales pegados a este plato en el carrito */}
+                        {item.adicionales.length > 0 && (
+                          <p className="text-[11px] text-amber-500 italic">
+                            + {item.adicionales.map(a => getTexto(a, 'nombre')).join(', ')}
+                          </p>
+                        )}
+                        <p className="text-xs text-zinc-400">${formatearMoneda(obtenerPrecioItemCompleto(item))} c/u</p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <button type="button" onClick={() => modificarCantidad(item.id, -1)} className="px-2 py-0.5 border border-zinc-700 hover:bg-zinc-800 text-xs">-</button>
-                        <span className="w-4 text-center text-xs">{item.cantidad}</span>
-                        <button type="button" onClick={() => modificarCantidad(item.id, 1)} className="px-2 py-0.5 border border-zinc-700 hover:bg-zinc-800 text-xs">+</button>
+                        <button type="button" onClick={() => modificarCantidad(item.carritoId, -1)} className="px-2 py-0.5 border border-zinc-700 hover:bg-zinc-800 text-xs">-</button>
+                        <span className="w-8 text-center text-xs">{item.cantidad}</span>
+                        <button type="button" onClick={() => modificarCantidad(item.carritoId, 1)} className="px-2 py-0.5 border border-zinc-700 hover:bg-zinc-800 text-xs">+</button>
                       </div>
                     </div>
                   ))}
@@ -300,7 +380,6 @@ export default function PaginaPedidos() {
                   <span className={darkMode ? 'text-amber-400' : 'text-black'}>${formatearMoneda(calcularTotal())}</span>
                 </div>
 
-                {/* Formulario de envío */}
                 <div className="space-y-3 pt-2">
                   <div>
                     <label className="block text-[10px] uppercase tracking-widest text-zinc-400 mb-1">{t.formularioCliente} *</label>
@@ -321,6 +400,18 @@ export default function PaginaPedidos() {
                       value={mesa}
                       onChange={(e) => setMesa(e.target.value)}
                       className={`w-full px-3 py-2 text-sm bg-transparent border outline-none ${darkMode ? 'border-zinc-800 focus:border-amber-500' : 'border-zinc-200 focus:border-black'}`}
+                    />
+                  </div>
+
+                  {/* NUEVO CAMPO DE NOTAS ADENTRO DEL FORMULARIO */}
+                  <div>
+                    <label className="block text-[10px] uppercase tracking-widest text-zinc-400 mb-1">{t.formularioNotas}</label>
+                    <textarea 
+                      rows="2"
+                      placeholder="..."
+                      value={notas}
+                      onChange={(e) => setNotas(e.target.value)}
+                      className={`w-full px-3 py-2 text-sm bg-transparent border outline-none resize-none ${darkMode ? 'border-zinc-800 focus:border-amber-500' : 'border-zinc-200 focus:border-black'}`}
                     />
                   </div>
                 </div>

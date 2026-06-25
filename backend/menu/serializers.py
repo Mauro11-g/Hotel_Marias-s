@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Categoria, Platillo
 from .models import Pedido, DetallePedido, Platillo
+from .models import Adicional
 
 class CategoriaSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,14 +16,18 @@ class PlatilloSerializer(serializers.ModelSerializer):
         model = Platillo
         fields = '__all__'
 
+class AdicionalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Adicional
+        fields = '__all__'
 
 class DetallePedidoSerializer(serializers.ModelSerializer):
-    # Usamos el ID del platillo para vincularlo al recibir los datos
     platillo_id = serializers.IntegerField(write_only=True)
+    adicionales = serializers.PrimaryKeyRelatedField(many=True, queryset=Adicional.objects.all(), required=False)
 
     class Meta:
         model = DetallePedido
-        fields = ['platillo_id', 'cantidad', 'precio_unitario']
+        fields = ['platillo_id', 'cantidad', 'precio_unitario', 'adicionales']
 
 
 class PedidoSerializer(serializers.ModelSerializer):
@@ -31,7 +36,7 @@ class PedidoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Pedido
-        fields = ['id', 'cliente', 'habitacion', 'total', 'estado', 'fecha', 'detalles']
+        fields = ['id', 'cliente', 'habitacion', 'total', 'notas', 'estado', 'fecha', 'detalles']
 
     def create(self, validated_data):
         # Extraemos la lista de platos del diccionario principal de datos
@@ -40,14 +45,19 @@ class PedidoSerializer(serializers.ModelSerializer):
         # Creamos la cabecera del Pedido principal
         pedido = Pedido.objects.create(**validated_data)
         
-        # Recorremos cada plato y lo guardamos vinculándolo al pedido recién creado
         for detalle in detalles_data:
+            adicionales_ids = detalle.pop('adicionales', [])
             platillo = Platillo.objects.get(id=detalle['platillo_id'])
-            DetallePedido.objects.create(
+            
+            detalle_obj = DetallePedido.objects.create(
                 pedido=pedido,
                 platillo=platillo,
                 cantidad=detalle['cantidad'],
                 precio_unitario=detalle['precio_unitario']
             )
+            
+            if adicionales_ids:
+                detalle_obj.adicionales.set(adicionales_ids)
+
         return pedido
 

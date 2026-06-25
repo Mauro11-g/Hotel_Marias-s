@@ -1,10 +1,13 @@
 from rest_framework import viewsets
+from django.http import JsonResponse
 from .models import Categoria, Platillo
 from .serializers import CategoriaSerializer, PlatilloSerializer
 from django.shortcuts import render, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
 from .models import Pedido
 from .serializers import PedidoSerializer
+from .models import Adicional
+from .serializers import AdicionalSerializer
 
 # Esto crea automáticamente la lógica para Leer, Crear, Editar y Borrar desde React
 class CategoriaViewSet(viewsets.ModelViewSet):
@@ -19,6 +22,9 @@ class PedidoViewSet(viewsets.ModelViewSet):
     queryset = Pedido.objects.all().order_by('-fecha')
     serializer_class = PedidoSerializer
     
+class AdicionalViewSet(viewsets.ModelViewSet):
+    queryset = Adicional.objects.all()
+    serializer_class = AdicionalSerializer
 
 @staff_member_required
 def imprimir_ticket_view(request, pedido_id):
@@ -34,3 +40,11 @@ def imprimir_ticket_view(request, pedido_id):
         'total_formateado': total_formateado,
     }
     return render(request, 'admin/ticket_pedido.html', context)
+
+def obtener_precio_platillo(request, platillo_id):
+    #""" Devuelve el precio de un plato en formato JSON para el admin """
+    try:
+        platillo = Platillo.objects.get(pk=platillo_id)
+        return JsonResponse({'precio': float(platillo.precio)})
+    except Platillo.DoesNotExist:
+        return JsonResponse({'precio': 0.0}, status=404)

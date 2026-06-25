@@ -1,0 +1,73 @@
+{% extends "admin/base_site.html" %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    /* 1. Ajustes de bordes y tamaños en la tabla de pedidos */
+    .tabular.inline-related table tbody td.field-cantidad input {
+        width: 60px !important;
+        text-align: center !important;
+        border: 1px solid #ccc !important;
+        border-radius: 4px !important;
+        padding: 4px !important;
+    }
+    .tabular.inline-related table tbody td.field-platillo .select2-container--default .select2-selection--single {
+        border: 1px solid #ccc !important;
+        border-radius: 4px !important;
+        height: 32px !important;
+    }
+    /* Quitar iconos nativos de Django (+, lápiz, ojo) de la izquierda */
+    .tabular.inline-related table tbody td.field-platillo .related-widget-wrapper-link,
+    .tabular.inline-related table tbody td.field-platillo .add-related,
+    .tabular.inline-related table tbody td.field-platillo .change-related {
+        display: none !important;
+    }
+
+    /* 2. Erradicar el link azul original de "Eliminar" */
+    .tabular.inline-related table thead th.column-delete {
+        font-size: 0 !important;
+        color: transparent !important;
+    }
+    .tabular.inline-related table thead th.column-delete::after {
+        content: "Acciones" !important;
+        font-size: 11px !important;
+        color: #666 !important;
+        font-weight: bold !important;
+    }
+    .tabular.inline-related table tbody td.delete input[type="checkbox"],
+    .tabular.inline-related table tbody td.delete a,
+    .tabular.inline-related table tbody td.delete span {
+        display: none !important;
+        visibility: hidden !important;
+        font-size: 0 !important;
+    }
+
+    /* 3. Diseño del botón rojo de sustitución */
+    .tabular.inline-related table tbody td.delete {
+        cursor: pointer !important;
+        vertical-align: middle !important;
+        text-align: center !important;
+    }
+    .tabular.inline-related table tbody td.delete::after {
+        content: "🗑️ Eliminar" !important;
+        display: inline-block !important;
+        padding: 5px 12px !important;
+        background-color: #dc3545 !important;
+        color: white !important;
+        font-size: 11px !important;
+        font-weight: bold !important;
+        border-radius: 4px !important;
+    }
+    .tabular.inline-related table tbody td.delete:hover::after {
+        background-color: #bd2130 !important;
+    }
+    .tabular.inline-related table tbody tr.deleted_row {
+        background-color: #ffe6e6 !important;
+        opacity: 0.5;
+    }
+    .tabular.inline-related table tbody tr.deleted_row td.delete::after {
+        content: "🔄 Deshacer" !important;
+        background-color: #6c757d !important;
+    }
+</style>
+{% endblock %}

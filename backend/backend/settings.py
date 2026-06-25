@@ -19,10 +19,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
+# ADVERTENCIA DE SEGURIDAD: ¡mantener en secreto la clave secreta utilizada en producción!
 SECRET_KEY = 'django-insecure-)7)^w2yh16ku*xs7)eon5v_n#)qddaoz6au(zsc*w=8p-rxxz6'
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# ADVERTENCIA DE SEGURIDAD: ¡no ejecutar con la depuración activada en producción!
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
@@ -60,10 +60,11 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -142,7 +143,6 @@ JAZZMIN_SETTINGS = {
     "site_brand": "Gestor Las Marías",
     "welcome_sign": "Bienvenido al Panel de Administración",
     
-    # ¡Esta es la magia que muestra el menú desplegable de idiomas arriba a la derecha!
     "language_chooser": True, 
 }
 

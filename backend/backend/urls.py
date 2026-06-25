@@ -2,12 +2,14 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from menu.views import CategoriaViewSet, PlatilloViewSet
-from menu.views import PedidoViewSet
+from menu.views import PedidoViewSet, AdicionalViewSet
+
 # Creamos el enrutador de nuestra API
 router = DefaultRouter()
 router.register(r'categorias', CategoriaViewSet)
 router.register(r'platillos', PlatilloViewSet)
 router.register(r'pedidos', PedidoViewSet)
+router.register(r'adicionales', AdicionalViewSet, basename='adicional')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -15,6 +17,7 @@ urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
     path('api/', include(router.urls)),
     path('api/', include('menu.urls')),
+    path('api/', include(router.urls)),
 ]
 
 admin.site.site_header = "Administración del Bar"
