@@ -174,14 +174,27 @@ document.addEventListener('DOMContentLoaded', function () {
                 // --- 1. SUMAR LOS ADICIONALES SELECCIONADOS EN ESTA FILA ---
                 let totalAdicionalesFila = 0;
                 
-                // Buscamos opciones de select seleccionadas u inputs checkbox marcados dentro de la celda de adicionales
-                row.querySelectorAll('.adicionales-ocultos select option:selected, .adicionales-ocultos select option:checked, .adicionales-ocultos input:checked').forEach(opcion => {
-                    const textoOpcion = opcion.textContent || opcion.innerText || ""; // Ej: "Salsa Cheddar (+$800.00)"
+                // 1. Conseguimos todas las opciones seleccionadas en la "caja grande" de forma nativa
+                const selectAdicionales = row.querySelector('.field-adicionales select');
+                let opcionesAdicionales = [];
+                
+                if (selectAdicionales && selectAdicionales.selectedOptions) {
+                    opcionesAdicionales = Array.from(selectAdicionales.selectedOptions);
+                }
+
+                // 2. Si llegaras a tener algún checkbox marcado por las dudas, lo sumamos al array
+                row.querySelectorAll('.field-adicionales input[type="checkbox"]:checked').forEach(cb => {
+                    opcionesAdicionales.push(cb);
+                });
+
+                // 3. Procesamos los precios recorriendo el array combinado
+                opcionesAdicionales.forEach(opcion => {
+                    // Si es un checkbox usamos su etiqueta/padre, si es un option usamos su textContent
+                    const textoOpcion = opcion.textContent || opcion.parentElement?.textContent || ""; 
                     
-                    // Expresión regular que busca el patrón (+$...) para extraer el precio del texto del admin
+                    // Tu expresión regular original (está perfecta)
                     const match = textoOpcion.match(/\(\+\$([\d.,]+)\)/);
                     if (match) {
-                        // Limpiamos los puntos de miles y pasamos la coma a punto decimal
                         let precioAdi = parseFloat(match[1].replace(/\./g, '').replace(',', '.')) || 0;
                         totalAdicionalesFila += precioAdi;
                     }
@@ -279,4 +292,69 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Ejecución de arranque para sincronizar la pantalla
     setTimeout(calcularTotalGeneral, 300);
+
+function acomodarBotoneraDefinitiva() {
+        // Apuntamos directo al contenedor de Jazzmin que vimos en tu F12
+        const submitRow = document.getElementById('jazzy-actions');
+        if (!submitRow) return;
+
+        // 1. Forzamos al contenedor principal a ser una fila horizontal de punta a punta
+        submitRow.style.setProperty('display', 'flex', 'important');
+        submitRow.style.setProperty('flex-direction', 'row', 'important');
+        submitRow.style.setProperty('justify-content', 'flex-start', 'important');
+        submitRow.style.setProperty('align-items', 'center', 'important');
+        submitRow.style.setProperty('gap', '12px', 'important');
+        submitRow.style.setProperty('flex-wrap', 'wrap', 'important');
+        submitRow.style.setProperty('width', '100%', 'important');
+
+        // 2. ROMPER LOS DIVS INTERMEDIOS (La clave de la segunda captura)
+        // Buscamos los divs hijos que separan los botones y los desactivamos estructuralmente
+        submitRow.querySelectorAll(':scope > div').forEach(divHijo => {
+            divHijo.style.setProperty('display', 'contents', 'important');
+        });
+
+        // 3. Ocultar estrictamente "Guardar y continuar editando"
+        const btnContinuar = submitRow.querySelector('input[name="_continue"]');
+        if (btnContinuar) {
+            btnContinuar.style.setProperty('display', 'none', 'important');
+        }
+
+        // 4. Transformar HISTÓRICO en CANCELAR (Botón Gris Secundario)
+        const btnHistorico = submitRow.querySelector('a[href*="/history/"]') || submitRow.querySelector('.object-tools a');
+        if (btnHistorico) {
+            btnHistorico.style.setProperty('background-color', '#6c757d', 'important');
+            btnHistorico.style.setProperty('border-color', '#6c757d', 'important');
+            btnHistorico.style.setProperty('color', '#ffffff', 'important');
+            btnHistorico.className = "btn btn-sm"; // Le removemos las clases que lo estiran
+            btnHistorico.innerHTML = 'CANCELAR';
+        }
+
+        // 5. Estilo simétrico para los botones visibles
+        submitRow.querySelectorAll('input[type="submit"], a.btn, .btn').forEach(btn => {
+            if (btn.style.display !== 'none') {
+                btn.style.setProperty('width', 'auto', 'important');
+                btn.style.setProperty('display', 'inline-block', 'important');
+                btn.style.setProperty('padding', '8px 20px', 'important');
+                btn.style.setProperty('margin', '0', 'important');
+                btn.style.setProperty('font-weight', 'bold', 'important');
+                btn.style.setProperty('border-radius', '6px', 'important');
+                btn.style.setProperty('font-size', '13px', 'important');
+                btn.style.setProperty('text-transform', 'uppercase', 'important');
+            }
+        });
+
+        // 6. Forzar botón "Eliminar" a color Rojo de peligro Bootstrap clásico
+        const btnEliminar = submitRow.querySelector('a[href*="/delete/"]');
+        if (btnEliminar) {
+            btnEliminar.style.setProperty('background-color', '#dc3545', 'important');
+            btnEliminar.style.setProperty('border-color', '#dc3545', 'important');
+            btnEliminar.style.setProperty('color', '#ffffff', 'important');
+        }
+    }
+
+    // Ejecutamos la función de inmediato y dejamos un intervalo corto por si Jazzmin tarda en cargar
+    acomodarBotoneraDefinitiva();
+    setTimeout(acomodarBotoneraDefinitiva, 50);
+    setTimeout(acomodarBotoneraDefinitiva, 200);
+
 });
