@@ -1,0 +1,116 @@
+/* 1. AMPLIAR EL RECUADRO PRINCIPAL AL 100%                           */
+@media (min-width: 992px) {
+    div.col-lg-9[class*="col-"] {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+    }
+}
+
+/* 2. FORZAR LA BARRA DE BOTONES ABAJO                                */
+div.col-lg-3.col-12[class*="col-"] {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+    margin-top: 30px !important;
+    clear: both !important;
+}
+
+/* Forzar al contenedor interno a ordenarse en fila horizontal */
+div.col-lg-3.col-12 .card,
+div.col-lg-3.col-12 .card-body {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+    padding: 15px !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+}
+
+/* Ocultar divs intermedios de estructura vertical de Bootstrap si existen */
+div.col-lg-3.col-12 .card-body > div {
+    display: contents !important;
+}
+
+div.col-lg-3.col-12 .card-header {
+    display: none !important;
+}
+
+/* 3. OCULTAR BOTONES SOBRANTES                                       */
+/* Ocultar "Guardar y continuar editando" */
+div.col-lg-3.col-12 button[name="_continue"],
+div.col-lg-3.col-12 .btn-info {
+    display: none !important; 
+}
+
+/* 4. REDISEÑO Y ALINEACIÓN HORIZONTAL DE BOTONES                     */
+div.col-lg-3.col-12 button, 
+div.col-lg-3.col-12 a.btn {
+    margin: 0 !important;
+    padding: 10px 24px !important;
+    font-weight: bold !important;
+    border-radius: 6px !important;
+    font-size: 13px !important;
+    width: auto !important;
+    flex: none !important;
+    display: inline-block !important;
+    text-transform: uppercase !important;
+    line-height: 1.5 !important;
+}
+
+/* Forzar botón "Eliminar" a color Rojo Peligro */
+div.col-lg-3.col-12 a.btn-danger {
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+    color: white !important;
+}
+
+/* 5. RECONSTRUIR "HISTÓRICO" EN EL BOTÓN "CANCELAR"                  */
+div.col-lg-3.col-12 a:has(i.fa-history),
+div.col-lg-3.col-12 a.btn-default:has(.fa-history) {
+    background-color: #6c757d !important;
+    border-color: #6c757d !important;
+    color: white !important;
+    font-size: 0 !important;
+}
+
+div.col-lg-3.col-12 a:has(i.fa-history)::after {
+    content: "CANCELAR" !important;
+    font-size: 13px !important;
+    font-weight: bold !important;
+    color: white !important;
+}
+
+div.col-lg-3.col-12 a:has(i.fa-history) i {
+    display: none !important;
+}
+
+/* =========================================================== */
+/* 6. DISEÑO INTERNO DE LA TABLA DE DETALLES                   */
+/* =========================================================== */
+.tabular.inline-related table tbody td.field-cantidad input {
+    width: 65px !important;
+    text-align: center !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 4px !important;
+}
+
+.tabular.inline-related table tbody td.field-platillo {
+    width: 280px !important; 
+    min-width: 280px !important;
+}
+
+#jazzy-actions ~ table .field-adicionales select,
+.field-adicionales select[multiple] {
+    max-height: 110px !important;
+    height: 110px !important;
+    font-size: 12px !important;
+    padding: 4px !important;
+    border-radius: 6px !important;
+    border: 1px solid #ced4da !important;
+    background-color: #f8f9fa !important;
+    overflow-y: auto !important;
+}

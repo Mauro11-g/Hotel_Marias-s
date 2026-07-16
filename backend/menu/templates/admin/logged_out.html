@@ -1,0 +1,80 @@
+{% extends "admin/logged_out.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    /* 1. Fondo de pantalla con la imagen del hotel */
+    body.login-page {
+        background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)), 
+                    url("{% static 'fondo_log.jpeg' %}") !important;
+        background-size: cover !important;
+        background-position: center !important;
+        background-repeat: no-repeat !important;
+        height: 100vh !important;
+    }
+
+    /* 2. Ocultar la versión dark del logo */
+    .login-logo img.logo-dark {
+        display: none !important;
+    }
+
+    /* 3. Reemplazar la 'M' por tu logo de Las Marías */
+    .login-logo img.logo-light {
+        content: url("{% static 'logo_nav.png' %}") !important; 
+        max-height: 110px !important;
+        width: auto !important;
+        margin: 0 auto 15px auto !important;
+        display: block !important;
+        filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.6)) !important;
+    }
+
+    /* 4. Estilos de la tarjeta flotante */
+    body.login-page .card {
+        border-radius: 16px !important;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45) !important;
+        background: rgba(255, 255, 255, 0.94) !important;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        overflow: hidden;
+    }
+
+    body.login-page .card-body.login-card-body {
+        padding: 2.5rem 2rem !important;
+        background: transparent !important;
+    }
+
+    body.login-page .login-box-msg {
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+        color: #4a4a4a !important;
+        letter-spacing: 0.5px !important;
+        margin-bottom: 10px !important;
+        padding: 0 !important;
+    }
+
+    /* 5. Estilo específico para el botón de esta pantalla (.btn-dark) */
+    body.login-page .btn-dark,
+    body.login-page a.btn-dark {
+        background-color: #1a1a1a !important;
+        border-color: #1a1a1a !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1.2px !important;
+        border-radius: 8px !important;
+        padding: 12px !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+        color: #ffffff !important;
+        text-decoration: none !important;
+    }
+
+    body.login-page .btn-dark:hover,
+    body.login-page a.btn-dark:hover {
+        background-color: #000000 !important;
+        border-color: #000000 !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3) !important;
+    }
+</style>
+{% endblock %}

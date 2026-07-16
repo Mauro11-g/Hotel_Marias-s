@@ -9,7 +9,6 @@ class CategoriaSerializer(serializers.ModelSerializer):
         fields = '__all__' # Traduce todos los campos
 
 class PlatilloSerializer(serializers.ModelSerializer):
-    # Esto es un truco para que nos mande el nombre de la categoría y no solo un número
     categoria_nombre = serializers.ReadOnlyField(source='categoria.nombre')
 
     class Meta:
@@ -31,7 +30,6 @@ class DetallePedidoSerializer(serializers.ModelSerializer):
 
 
 class PedidoSerializer(serializers.ModelSerializer):
-    # Declaramos la relación anidada para los platos del pedido
     detalles = DetallePedidoSerializer(many=True)
 
     class Meta:
@@ -39,10 +37,7 @@ class PedidoSerializer(serializers.ModelSerializer):
         fields = ['id', 'cliente', 'habitacion', 'total', 'notas', 'estado', 'fecha', 'detalles']
 
     def create(self, validated_data):
-        # Extraemos la lista de platos del diccionario principal de datos
         detalles_data = validated_data.pop('detalles')
-        
-        # Creamos la cabecera del Pedido principal
         pedido = Pedido.objects.create(**validated_data)
         
         for detalle in detalles_data:

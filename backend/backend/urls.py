@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from menu.views import CategoriaViewSet, PlatilloViewSet
 from menu.views import PedidoViewSet, AdicionalViewSet
 
-# Creamos el enrutador de nuestra API
+# Enrutador de nuestra API
 router = DefaultRouter()
 router.register(r'categorias', CategoriaViewSet)
 router.register(r'platillos', PlatilloViewSet)
@@ -12,7 +12,7 @@ router.register(r'pedidos', PedidoViewSet)
 router.register(r'adicionales', AdicionalViewSet, basename='adicional')
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('control-gestionador-marias/', admin.site.urls),
     path('api/', include(router.urls)),
     path('i18n/', include('django.conf.urls.i18n')),
     path('api/', include(router.urls)),

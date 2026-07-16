@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,17 +24,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # ADVERTENCIA DE SEGURIDAD: ¡mantener en secreto la clave secreta utilizada en producción!
-SECRET_KEY = 'django-insecure-)7)^w2yh16ku*xs7)eon5v_n#)qddaoz6au(zsc*w=8p-rxxz6'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # ADVERTENCIA DE SEGURIDAD: ¡no ejecutar con la depuración activada en producción!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG') == 'True'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'menu',
     'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -38,13 +43,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'menu',
     'rest_framework',
     'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
@@ -60,7 +65,7 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [BASE_DIR /'menu' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -82,9 +87,9 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'restaurante_hotel',    
-        'USER': 'root',                 
-        'PASSWORD': 'Mauuroot12',    
+        'NAME': os.environ.get('DB_NAME', 'restaurante_hotel'), 
+        'USER': os.environ.get('DB_USER', 'root'),                 
+        'PASSWORD': os.environ.get('DB_PASSWORD', ''),    
         'HOST': 'localhost',            
         'PORT': '3306',                 
     }
@@ -133,15 +138,20 @@ NUMBER_GROUPING = 3
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 CORS_ALLOW_ALL_ORIGINS = True
 
 JAZZMIN_SETTINGS = {
-    "site_title": "Las Marías Admin",
+    "site_title": "Gestor Las Marías",
     "site_header": "Las Marías",
     "site_brand": "Gestor Las Marías",
     "welcome_sign": "Bienvenido al Panel de Administración",
+    "site_logo": "logo_fav.png",
+    "site_icon": "logo_nav.png",
+    "site_logo_classes": "img-circle",
     
     "language_chooser": True, 
 }
@@ -162,3 +172,26 @@ JAZZMIN_UI_TWEAKS = {
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+LOGIN_REDIRECT_URL = '/control-gestionador-marias/'
+LOGOUT_REDIRECT_URL = '/control-gestionador-marias/login/'
+
+# ==========================================
+# CONFIGURACIONES DE SEGURIDAD PARA PRODUCCIÓN
+# ==========================================
+
+# Evita que incrusten tu sitio en un iframe (protección Clickjacking)
+X_FRAME_OPTIONS = 'DENY'
+
+# Filtros de seguridad del navegador
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Protege las cookies para que solo viajen por HTTPS (PythonAnywhere te da HTTPS gratis)
+CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+
+# Redirige todo el tráfico HTTP a HTTPS
+SECURE_SSL_REDIRECT = not DEBUG
+
+# CSRF_TRUSTED_ORIGINS = ['https://lasmariashotel.pythonanywhere.com']
