@@ -8,6 +8,7 @@ from .models import Pedido
 from .serializers import PedidoSerializer
 from .models import Adicional
 from .serializers import AdicionalSerializer
+from django.shortcuts import render
 
 class CategoriaViewSet(viewsets.ModelViewSet):
     queryset = Categoria.objects.all()
@@ -47,3 +48,6 @@ def obtener_precio_platillo(request, platillo_id):
         return JsonResponse({'precio': float(platillo.precio)})
     except Platillo.DoesNotExist:
         return JsonResponse({'precio': 0.0}, status=404)
+    
+def carta_view(request):
+    return render(request, 'index.html')
