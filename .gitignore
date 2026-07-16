@@ -1,8 +1,10 @@
 # Python y Django
+.env/
+.venv/
 env/
-venv/
 __pycache__/
 *.pyc
+staticfiles/
 db.sqlite3
 
 # Node.js y React

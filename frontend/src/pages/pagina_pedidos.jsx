@@ -17,7 +17,7 @@ const traducciones = {
     carritoVacio: "No has seleccionado ningún platillo.",
     formularioCliente: "Nombre para el pedido",
     formularioMesa: "Habitación",
-    formularioNotas: "Notas / Aclaraciones (ej: sin cebolla)",
+    formularioNotas: "Notes / Aclaraciones (ej: sin cebolla)",
     botonEnviar: "Confirmar y Enviar Pedido",
     pedidoExito: "¡Pedido enviado con éxito! Se está procesando.",
     total: "Total",
@@ -60,16 +60,13 @@ export default function PaginaPedidos() {
   const [categoriaActiva, setCategoriaActiva] = useState('');
   const [platillos, setPlatillos] = useState([]);
   const [adicionalesDisponibles, setAdicionalesDisponibles] = useState([]);
-  
-  // Guardamos los adicionales tildados temporalmente por el cliente en el menú principal
-  // Estructura: { [platilloId]: [idAdicional1, idAdicional2] }
   const [adicionalesSeleccionados, setAdicionalesSeleccionados] = useState({});
 
   // --- ESTADOS DEL CARRITO Y FORMULARIO ---
   const [carrito, setCarrito] = useState([]);
   const [cliente, setCliente] = useState('');
   const [mesa, setMesa] = useState('');
-  const [notas, setNotas] = useState(''); // <-- NUEVO ESTADO PARA NOTAS
+  const [notas, setNotas] = useState('');
   const [enviadoExito, setEnviadoExito] = useState(false);
   const [notificacion, setNotificacion] = useState("");
 
@@ -82,7 +79,7 @@ export default function PaginaPedidos() {
   };
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/categorias/')
+    fetch('http://192.168.100.95:8000/api/categorias/')
       .then(response => response.json())
       .then(data => {
         setCategorias(data);
@@ -91,13 +88,13 @@ export default function PaginaPedidos() {
         }
       });
 
-    fetch('http://localhost:8000/api/platillos/')
+    fetch('http://192.168.100.95:8000/api/platillos/')
       .then(response => response.json())
       .then(data => setPlatillos(data))
       .catch(err => console.error("Error:", err));
 
     // Traemos los adicionales de la API que creaste en Django
-    fetch('http://localhost:8000/api/adicionales/')
+    fetch('http://192.168.100.95:8000/api/adicionales/')
       .then(response => response.json())
       .then(data => setAdicionalesDisponibles(data))
       .catch(err => console.error("Error trayendo adicionales:", err));
@@ -117,12 +114,10 @@ export default function PaginaPedidos() {
 
   // --- LÓGICA INTERNA DEL CARRITO ---
   const agregarAlCarrito = (plato) => {
-    // Obtenemos los objetos completos de los adicionales que el cliente tildó para este plato
     const idsElegidos = adicionalesSeleccionados[plato.id] || [];
     const adicionalesCompletos = adicionalesDisponibles.filter(a => idsElegidos.includes(a.id));
 
     setCarrito((prevCarrito) => {
-      // Un elemento en el carrito se considera duplicado si coincide el ID del plato Y exactamente los mismos adicionales
       const existe = prevCarrito.find(item => 
         item.id === plato.id && 
         JSON.stringify(item.adicionales.map(a => a.id).sort()) === JSON.stringify(idsElegidos.sort())
@@ -136,13 +131,13 @@ export default function PaginaPedidos() {
         );
       }
 
-      // Creamos una clave compuesta única para identificar este combo en la UI del carrito
+
       const carritoIdUnique = `${plato.id}-${idsElegidos.join('-')}-${Date.now()}`;
 
       return [...prevCarrito, { ...plato, carritoId: carritoIdUnique, cantidad: 1, adicionales: adicionalesCompletos }];
     });
 
-    // Limpiamos los checkboxes del menú para el siguiente plato
+
     setAdicionalesSeleccionados(prev => ({ ...prev, [plato.id]: [] }));
 
     setNotificacion(`"${getTexto(plato, 'nombre')}" agregado al pedido`);
@@ -161,7 +156,7 @@ export default function PaginaPedidos() {
     );
   };
 
-  // Calcula el costo de un renglón sumando precio de plato + adicionales seleccionados
+
   const obtenerPrecioItemCompleto = (item) => {
     const precioPlato = parseFloat(item.precio) || 0;
     const precioAdicionales = item.adicionales.reduce((sum, a) => sum + (parseFloat(a.precio) || 0), 0);
@@ -172,7 +167,7 @@ export default function PaginaPedidos() {
     return carrito.reduce((sum, item) => sum + (obtenerPrecioItemCompleto(item) * item.cantidad), 0).toFixed(2);
   };
 
-  // --- ENVIAR DATOS A DJANGO ---
+
   const manejarEnviarPedido = (e) => {
     e.preventDefault();
     if (!cliente || carrito.length === 0) return;
@@ -181,16 +176,16 @@ export default function PaginaPedidos() {
       cliente: cliente,
       habitacion: mesa,
       total: calcularTotal(),
-      notas: notas, // <-- ENVIAMOS EL CAMPO NOTAS A TU DJANGO
+      notas: notas,
       detalles: carrito.map(item => ({
         platillo_id: item.id,
         cantidad: item.cantidad,
         precio_unitario: parseFloat(item.precio).toFixed(2),
-        adicionales: item.adicionales.map(a => a.id) // <-- ENVIAMOS EL ARRAY DE IDs DE ADICIONALES
+        adicionales: item.adicionales.map(a => a.id)
       }))
     };
 
-    fetch('http://localhost:8000/api/pedidos/', {
+    fetch('http://10.0.13.108:8000/api/pedidos/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -203,7 +198,7 @@ export default function PaginaPedidos() {
         setCarrito([]);
         setCliente('');
         setMesa('');
-        setNotas(''); // Limpiamos las notas
+        setNotas('');
         setTimeout(() => setEnviadoExito(false), 5000);
       }
     })
@@ -306,8 +301,8 @@ export default function PaginaPedidos() {
                         {getTexto(plato, 'descripcion')}
                       </p>
 
-                      {/* RENDEREADO DE ADICIONALES ABAJO DEL PLATO */}
-                      {adicionalesDisponibles.length > 0 && (
+                      {/* CORRECCIÓN AQUÍ: COMPROBAMOS SI ESTE PLATO TIENE ADICIONALES PERMITIDOS ANTES DE RENDERIZAR */}
+                      {adicionalesDisponibles.filter(adi => adi.platillos_permitidos && adi.platillos_permitidos.includes(plato.id)).length > 0 && (
                         <div className="mt-3 pl-4 border-l-2 border-zinc-200 dark:border-zinc-800">
                           <p className="text-xs uppercase tracking-wider text-zinc-400 mb-2 font-medium">{t.adicionalesTitulo}</p>
                           <div className="flex flex-wrap gap-4">

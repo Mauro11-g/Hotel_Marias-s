@@ -4,6 +4,7 @@ const traducciones = {
   es: {
     subtitulo: "CARTA GASTRONÓMICA",
     sinPlatos: "No hay platos en esta categoría aún.",
+    adicionalesTitulo: "Adicionales:",
     categorias: {
       "Entradas": "Entradas",
       "Platos Principales": "Platos Principales",
@@ -14,6 +15,7 @@ const traducciones = {
   en: {
     subtitulo: "GASTRONOMIC MENU",
     sinPlatos: "No dishes in this category yet.",
+    adicionalesTitulo: "Add-ons:",
     categorias: {
       "Entradas": "Appetizers",
       "Platos Principales": "Main Courses",
@@ -24,6 +26,7 @@ const traducciones = {
   pt: {
     subtitulo: "CARTA GASTRONÔMICA",
     sinPlatos: "Ainda não há pratos nesta categoria.",
+    adicionalesTitulo: "Adicionais:",
     categorias: {
       "Entradas": "Entradas",
       "Platos Principales": "Pratos Principais",
@@ -48,6 +51,7 @@ export default function MenuPrincipal() {
   const [categorias, setCategorias] = useState([]);
   const [categoriaActiva, setCategoriaActiva] = useState('');
   const [platillos, setPlatillos] = useState([]);
+  const [adicionalesDisponibles, setAdicionalesDisponibles] = useState([]);
 
   const getTexto = (item, campoPrincipal) => {
     if (!item) return '';
@@ -58,7 +62,7 @@ export default function MenuPrincipal() {
   };
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/categorias/')
+    fetch('http://192.168.100.95:8000/api/categorias/')
       .then(response => response.json())
       .then(data => {
         setCategorias(data);
@@ -67,10 +71,16 @@ export default function MenuPrincipal() {
         }
       });
 
-    fetch('http://localhost:8000/api/platillos/')
+    fetch('http://192.168.100.95:8000/api/platillos/')
       .then(response => response.json())
       .then(data => setPlatillos(data))
       .catch(err => console.error("Error:", err));
+
+    
+    fetch('http://192.168.100.95:8000/api/adicionales/')
+      .then(response => response.json())
+      .then(data => setAdicionalesDisponibles(data))
+      .catch(err => console.error("Error trayendo adicionales de la carta:", err));
   }, []);
 
   const t = traducciones[idioma];
@@ -151,14 +161,30 @@ export default function MenuPrincipal() {
                   <h3 className={`text-lg font-medium transition-colors ${darkMode ? 'group-hover:text-amber-400' : 'group-hover:text-zinc-500'}`} style={{ fontFamily: 'Georgia, serif' }}>
                     {getTexto(plato, 'nombre')}
                   </h3>
-                  {/* CAMBIO AQUÍ: Formateamos el precio de los platos */}
                   <span className={`text-sm font-semibold ${darkMode ? 'text-amber-500' : 'text-black'}`}>
                     ${formatearMoneda(plato.precio)}
                   </span>
                 </div>
-                <p className="text-sm italic leading-relaxed text-zinc-500 dark:text-zinc-400">
+                <p className="text-sm italic leading-relaxed text-zinc-500 dark:text-zinc-400 mb-2">
                   {getTexto(plato, 'descripcion')}
                 </p>
+
+                {/* Bloque dinámico de adicionales para la carta */}
+                {adicionalesDisponibles.filter(adi => adi.platillos_permitidos && adi.platillos_permitidos.includes(plato.id)).length > 0 && (
+                  <div className="mt-2 pl-3 border-l border-zinc-200 dark:border-zinc-800">
+                    <span className="text-[10px] uppercase tracking-wider text-zinc-400 block mb-0.5 font-medium">{t.adicionalesTitulo}</span>
+                    <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs">
+                      {adicionalesDisponibles
+                        .filter(adi => adi.platillos_permitidos && adi.platillos_permitidos.includes(plato.id))
+                        .map((adi, index, array) => (
+                          <span key={adi.id} className={darkMode ? 'text-zinc-500' : 'text-zinc-500'}>
+                            {getTexto(adi, 'nombre')} (+${formatearMoneda(adi.precio)})
+                            {index < array.length - 1 && <span className="ml-3 inline-block text-zinc-300 dark:text-zinc-800">|</span>}
+                          </span>
+                        ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ))
           )}
