@@ -3,6 +3,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from menu.views import CategoriaViewSet, PlatilloViewSet
 from menu.views import PedidoViewSet, AdicionalViewSet
+from django.views.generic import TemplateView
 
 # Enrutador de nuestra API
 router = DefaultRouter()
@@ -18,6 +19,7 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('api/', include('menu.urls')),
     path('api/', include(router.urls)),
+    path('carta/', TemplateView.as_view(template_name='index.html')),
 ]
 
 admin.site.site_header = "Administración del Bar"
