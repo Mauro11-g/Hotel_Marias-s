@@ -62,7 +62,7 @@ export default function MenuPrincipal() {
   };
 
   useEffect(() => {
-    fetch('http://192.168.100.95:8000/api/categorias/')
+    fetch('/api/categorias/')
       .then(response => response.json())
       .then(data => {
         setCategorias(data);
@@ -71,13 +71,13 @@ export default function MenuPrincipal() {
         }
       });
 
-    fetch('http://192.168.100.95:8000/api/platillos/')
+    fetch('/api/platillos/')
       .then(response => response.json())
       .then(data => setPlatillos(data))
       .catch(err => console.error("Error:", err));
 
     
-    fetch('http://192.168.100.95:8000/api/adicionales/')
+    fetch('/api/adicionales/')
       .then(response => response.json())
       .then(data => setAdicionalesDisponibles(data))
       .catch(err => console.error("Error trayendo adicionales de la carta:", err));

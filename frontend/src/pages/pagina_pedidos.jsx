@@ -79,7 +79,7 @@ export default function PaginaPedidos() {
   };
 
   useEffect(() => {
-    fetch('http://192.168.100.95:8000/api/categorias/')
+    fetch('/api/categorias/')
       .then(response => response.json())
       .then(data => {
         setCategorias(data);
@@ -88,13 +88,13 @@ export default function PaginaPedidos() {
         }
       });
 
-    fetch('http://192.168.100.95:8000/api/platillos/')
+    fetch('/api/platillos/')
       .then(response => response.json())
       .then(data => setPlatillos(data))
       .catch(err => console.error("Error:", err));
 
     // Traemos los adicionales de la API que creaste en Django
-    fetch('http://192.168.100.95:8000/api/adicionales/')
+    fetch('/api/adicionales/')
       .then(response => response.json())
       .then(data => setAdicionalesDisponibles(data))
       .catch(err => console.error("Error trayendo adicionales:", err));
@@ -185,7 +185,7 @@ export default function PaginaPedidos() {
       }))
     };
 
-    fetch('http://10.0.13.108:8000/api/pedidos/', {
+    fetch('/api/pedidos/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
