@@ -118,9 +118,9 @@ export default function MenuPrincipal() {
         {/* --- TÍTULO --- */}
         <div className="text-center mb-16 flex flex-col items-center">
           <img 
-            src="/logo2.png"
-            alt="Logo Las Marías" 
-            className={`h-42 mb-6 transition-all duration-500 ${darkMode ? 'invert opacity-90' : ''}`}
+          src={`${import.meta.env.BASE_URL}logo2.png`} 
+          alt="Bar Hotel Las Marias" 
+          className={`h-42 mb-6 transition-all duration-500 ${darkMode ? 'invert opacity-90' : ''}`}
           />
           <div className={`w-12 h-px mx-auto mb-4 ${darkMode ? 'bg-amber-500' : 'bg-black'}`}></div>
           <p className={`text-sm tracking-[0.3em] font-light ${darkMode ? 'text-amber-500/80' : 'text-zinc-400'}`}>
