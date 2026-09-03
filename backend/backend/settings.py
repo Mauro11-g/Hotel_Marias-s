@@ -82,7 +82,7 @@ TEMPLATES = [
 ]
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, '..', 'frontend', 'dist'),
+    BASE_DIR.parent / 'frontend' / 'dist',
 ]
 
 WSGI_APPLICATION = 'backend.wsgi.application'
@@ -156,6 +156,8 @@ NUMBER_GROUPING = 3
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+DJANGO_VITE_ASSETS_PATH = BASE_DIR.parent / 'frontend' / 'dist'
 
 # Default primary key field type
 CORS_ALLOW_ALL_ORIGINS = True
