@@ -30,6 +30,8 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # ADVERTENCIA DE SEGURIDAD: ¡no ejecutar con la depuración activada en producción!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
+DJANGO_VITE_DEV_MODE = os.environ.get('DJANGO_VITE_DEV_MODE', 'False') == 'True'
+
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
 
@@ -207,5 +209,3 @@ SESSION_COOKIE_SECURE = not DEBUG
 
 # Redirige todo el tráfico HTTP a HTTPS
 SECURE_SSL_REDIRECT = not DEBUG
-
-DJANGO_VITE_DEV_MODE = False
