@@ -118,7 +118,7 @@ export default function MenuPrincipal() {
         {/* --- TÍTULO --- */}
         <div className="text-center mb-16 flex flex-col items-center">
           <img 
-            src="./logo2.png"
+            src="/logo2.png"
             alt="Logo Las Marías" 
             className={`h-42 mb-6 transition-all duration-500 ${darkMode ? 'invert opacity-90' : ''}`}
           />

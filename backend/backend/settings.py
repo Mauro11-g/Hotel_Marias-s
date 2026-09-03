@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import dj_database_url
 
 load_dotenv()
 
@@ -27,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # ADVERTENCIA DE SEGURIDAD: ¡no ejecutar con la depuración activada en producción!
-DEBUG = os.environ.get('DEBUG') == 'True'
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
@@ -100,11 +101,14 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': os.environ.get('DB_NAME', 'restaurante_hotel'), 
-            'USER': os.environ.get('DB_USER', 'root'),                 
-            'PASSWORD': os.environ.get('DB_PASSWORD', ''),    
-            'HOST': 'localhost',            
-            'PORT': '3306',                 
+            'NAME': os.environ.get('DB_NAME'), 
+            'USER': os.environ.get('DB_USER'),                 
+            'PASSWORD': os.environ.get('DB_PASSWORD'),    
+            'HOST': os.environ.get('DB_HOST'),
+            'PORT': os.environ.get('DB_PORT'),
+            'OPTIONS': {
+                'ssl': {'reject_server_certificate': True}        
+            }         
         }
     }
 
