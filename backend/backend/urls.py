@@ -5,6 +5,8 @@ from menu.views import CategoriaViewSet, PlatilloViewSet
 from menu.views import PedidoViewSet, AdicionalViewSet
 from django.views.generic import TemplateView
 from menu.views import carta_view
+from django.conf import settings
+from django.conf.urls.static import static
 
 # Enrutador de nuestra API
 router = DefaultRouter()
@@ -21,7 +23,7 @@ urlpatterns = [
     path('api/', include('menu.urls')),
     path('api/', include(router.urls)),
     path('carta/', carta_view),
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 admin.site.site_header = "Administración del Bar"
 admin.site.site_title = "Portal del Gerente"
