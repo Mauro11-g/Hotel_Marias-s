@@ -98,12 +98,15 @@ if os.environ.get('USE_SQLITE', 'False') == 'True':
         }
     }
 else:
+    db_from_env = dj_database_url.config(
+        default=os.environ.get('DATABASE_URL'),
+        conn_max_age=600
+    )
+    db_from_env['OPTIONS'] = {
+        'ssl': {'ca': None}
+    }
     DATABASES = {
-        'default': dj_database_url.config(
-            default=os.environ.get('DATABASE_URL'),
-            conn_max_age=600,
-            ssl_require=True
-        )
+        'default': db_from_env
     }
 
 
