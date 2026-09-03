@@ -20,10 +20,8 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-FRONTEND_DIST_DIR = BASE_DIR / 'frontend' / 'dist'
-
 STATICFILES_DIRS = [
-    FRONTEND_DIST_DIR,
+    BASE_DIR / 'frontend' / 'dist',
 ]
 
 # Quick-start development settings - unsuitable for production
@@ -37,7 +35,7 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 DJANGO_VITE_DEV_MODE = os.environ.get('DJANGO_VITE_DEV_MODE', 'False') == 'True'
 
-DJANGO_VITE_ASSETS_PATH = FRONTEND_DIST_DIR
+DJANGO_VITE_ASSETS_PATH = BASE_DIR / 'frontend' / 'dist'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
