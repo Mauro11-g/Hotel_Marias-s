@@ -58,7 +58,4 @@ def obtener_precio_platillo(request, platillo_id):
         return JsonResponse({'precio': 0.0}, status=404)
     
 def carta_view(request):
-    # Esto busca el archivo directamente en la carpeta dist
-    path_to_index = os.path.join(settings.BASE_DIR, '..', 'frontend', 'dist', 'index.html')
-    with open(path_to_index, 'r', encoding='utf-8') as f:
-        return HttpResponse(f.read())
+    return render(request, 'menu/index.html')
