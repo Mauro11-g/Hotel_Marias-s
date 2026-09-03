@@ -208,4 +208,4 @@ SESSION_COOKIE_SECURE = not DEBUG
 # Redirige todo el tráfico HTTP a HTTPS
 SECURE_SSL_REDIRECT = not DEBUG
 
-# CSRF_TRUSTED_ORIGINS = ['https://lasmariashotel.pythonanywhere.com']
+DJANGO_VITE_DEV_MODE = False
