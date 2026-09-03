@@ -26,8 +26,8 @@ STATICFILES_DIRS = [
 
 DJANGO_VITE = {
     "default": {
-        "dev_mode": os.environ.get('DJANGO_VITE_DEV_MODE', 'False') == 'True',
-        "assets_path": BASE_DIR / 'frontend' / 'dist',
+        "dev_mode": False,
+        "manifest_path": BASE_DIR / 'frontend' / 'dist' / '.vite' / 'manifest.json',
     }
 }
 
