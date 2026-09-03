@@ -31,9 +31,6 @@ class AdicionalViewSet(viewsets.ModelViewSet):
     serializer_class = AdicionalSerializer
 
 
-def home_view(request):
-    return render(request, 'index.html')
-
 @staff_member_required
 def imprimir_ticket_view(request, pedido_id):
     pedido = get_object_or_404(Pedido, id=pedido_id)
