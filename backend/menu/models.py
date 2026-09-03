@@ -11,9 +11,17 @@ class Categoria(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.nombre_en and self.nombre:
-            self.nombre_en = GoogleTranslator(source='es', target='en').translate(self.nombre)
+            try:
+                self.nombre_en = GoogleTranslator(source='es', target='en').translate(self.nombre)
+            except Exception:
+                self.nombre_en = self.nombre
+                
         if not self.nombre_pt and self.nombre:
-            self.nombre_pt = GoogleTranslator(source='es', target='pt').translate(self.nombre)
+            try:
+                self.nombre_pt = GoogleTranslator(source='es', target='pt').translate(self.nombre)
+            except Exception:
+                self.nombre_pt = self.nombre
+                
         super().save(*args, **kwargs)
 
 
