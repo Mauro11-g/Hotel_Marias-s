@@ -17,11 +17,9 @@ router.register(r'adicionales', AdicionalViewSet, basename='adicional')
 
 urlpatterns = [
     path('control-gestionador-marias/', admin.site.urls),
-    path('api/', include(router.urls)),
     path('i18n/', include('django.conf.urls.i18n')),
     path('api/', include(router.urls)),
     path('api/', include('menu.urls')),
-    path('api/', include(router.urls)),
     path('carta/', carta_view),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
