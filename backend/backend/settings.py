@@ -24,6 +24,13 @@ STATICFILES_DIRS = [
     BASE_DIR / 'frontend' / 'dist',
 ]
 
+DJANGO_VITE = {
+    "default": {
+        "dev_mode": os.environ.get('DJANGO_VITE_DEV_MODE', 'False') == 'True',
+        "assets_path": BASE_DIR / 'frontend' / 'dist',
+    }
+}
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
@@ -32,10 +39,6 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # ADVERTENCIA DE SEGURIDAD: ¡no ejecutar con la depuración activada en producción!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-
-DJANGO_VITE_DEV_MODE = os.environ.get('DJANGO_VITE_DEV_MODE', 'False') == 'True'
-
-DJANGO_VITE_ASSETS_PATH = BASE_DIR / 'frontend' / 'dist'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
