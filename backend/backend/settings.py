@@ -80,8 +80,7 @@ TEMPLATES = [
 ]
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, '..', 'frontend', 'dist'), # Directorio base
-    os.path.join(BASE_DIR, '..', 'frontend', 'dist', 'assets'), # Directorio de assets
+    os.path.join(BASE_DIR, '..', 'frontend', 'dist'),
 ]
 
 WSGI_APPLICATION = 'backend.wsgi.application'
