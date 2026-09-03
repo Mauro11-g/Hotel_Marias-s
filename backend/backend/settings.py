@@ -32,6 +32,8 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 DJANGO_VITE_DEV_MODE = os.environ.get('DJANGO_VITE_DEV_MODE', 'False') == 'True'
 
+DJANGO_VITE_ASSETS_PATH = BASE_DIR.parent / 'frontend' / 'dist'
+
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
 
@@ -82,7 +84,7 @@ TEMPLATES = [
 ]
 
 STATICFILES_DIRS = [
-    BASE_DIR.parent / 'frontend' / 'dist',
+    BASE_DIR / 'frontend' / 'dist',
 ]
 
 WSGI_APPLICATION = 'backend.wsgi.application'
@@ -157,7 +159,7 @@ STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-DJANGO_VITE_ASSETS_PATH = BASE_DIR.parent / 'frontend' / 'dist'
+DJANGO_VITE_ASSETS_PATH = BASE_DIR / 'frontend' / 'dist'
 
 # Default primary key field type
 CORS_ALLOW_ALL_ORIGINS = True
