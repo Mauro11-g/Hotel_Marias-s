@@ -12,6 +12,7 @@ from django.shortcuts import render
 import os
 from django.http import HttpResponse
 from django.conf import settings
+from django.shortcuts import render
 
 class CategoriaViewSet(viewsets.ModelViewSet):
     queryset = Categoria.objects.all()
@@ -28,6 +29,10 @@ class PedidoViewSet(viewsets.ModelViewSet):
 class AdicionalViewSet(viewsets.ModelViewSet):
     queryset = Adicional.objects.all()
     serializer_class = AdicionalSerializer
+
+
+def home_view(request):
+    return render(request, 'index.html')
 
 @staff_member_required
 def imprimir_ticket_view(request, pedido_id):
