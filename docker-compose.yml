@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: hotel_db
+      MYSQL_USER: hotel_mau
+      MYSQL_PASSWORD: mauadmmarias@3213
+      MYSQL_ROOT_PASSWORD: gatomaxihijomio2313
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  web:
+    build: .
+    container_name: django_web
+    restart: always
+    command: gunicorn --bind 0.0.0.0:8000 backend.wsgi:application
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_HOST=db
+      - DB_NAME=hotel_db
+      - DB_USER=hotel_mau
+      - DB_PASSWORD=mauadmmarias@3213
+    depends_on:
+      - db
+
+volumes:
+  mysql_data:
