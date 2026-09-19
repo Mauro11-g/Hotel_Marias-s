@@ -122,5 +122,6 @@ class PlatilloAdmin(admin.ModelAdmin):
 @admin.register(Adicional)
 class AdicionalAdmin(admin.ModelAdmin):
     list_display = ('id', 'nombre', 'precio')
+    list_display_links = ('nombre',)
     search_fields = ('nombre',)
     ordering = ('nombre',)
